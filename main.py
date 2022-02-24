@@ -112,8 +112,9 @@ class Player(Ship):
     def check_high_score(self):
         if main.score > int(main.high_score):
             main.high_score = main.score
+            main.temp=main_menu.user_text+" "+str(main.score)+" "
             high_score_file = open("high_score.txt", "r+")
-            high_score_file.write(str(main.score))
+            high_score_file.write(main.temp)
     
     def draw(self,window):
         super().draw(window)
@@ -155,7 +156,8 @@ def main():
     lives=5
     main.score=0
     high_score_file = open("high_score.txt", "r")
-    main.high_score = high_score_file.read()    
+    main.temp = high_score_file.read()   
+    main.high_score=main.temp.split(" ")[1:][0]
     main_font=pygame.font.SysFont("comicsans",30)
     lost_font=pygame.font.SysFont("comicsans",60)
     
@@ -176,8 +178,9 @@ def main():
     def check_high_score():
         if main.score > int(main.high_score):
             main.high_score = main.score
+            main.temp=main_menu.user_text+" "+str(main.score)+" "
             high_score_file = open("high_score.txt", "r+")
-            high_score_file.write(str(main.score))
+            high_score_file.write(main.temp)
     
     def redraw_window():
         WINDOW.blit(BG,(0,0))
@@ -185,9 +188,9 @@ def main():
         level_label= main_font.render(f" Level: {level}",1,(255,255,255))
         lives_label= main_font.render(f"Lives: {lives}",1,(255,255,255))  
         score_label=main_font.render(f"Score: {main.score}",1,(255,255,255)) 
-        high_score_label = main_font.render(f"High Score: {main.high_score}",1,(255,255,255))    
+        high_score_label = main_font.render(f"High Score: {main.temp}",1,(255,255,255))    
         WINDOW.blit(level_label,(5,5))
-        WINDOW.blit(lives_label,(WIDTH-lives_label.get_width()-5,5))
+        WINDOW.blit(lives_label,(WIDTH-lives_label.get_width()-15,5))
         WINDOW.blit(score_label,(5,40))
         WINDOW.blit(high_score_label,(WIDTH-high_score_label.get_width()-5,40))
         
@@ -222,7 +225,9 @@ def main():
             for i in range(wave_length):
                 enemy=Enemy(random.randrange(50,WIDTH-100),random.randrange(-1500,-100),random.choice(["red","green"]))
                 enemies.append(enemy)
-                 
+                
+       
+            
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 quit()
@@ -258,21 +263,44 @@ def main():
         player.move_lasers(-laser_velocity_player,enemies)    
 
 def main_menu():
-    title_font=pygame.font.SysFont("comicsans",50)
+    main_menu.user_text=''
+    input_rect=pygame.Rect(300,350,140,32)
+    user_text_font=pygame.font.SysFont("comicsans",20)
+    title_font=pygame.font.SysFont("comicsans",30)
+    active=False
     run=True
+    
     while run:
         WINDOW.blit(BG,(0,0))
-        title_label=title_font.render('Press the mouse to start...',1,(255,255,255))
-        WINDOW.blit(title_label,(WIDTH/2-title_label.get_width()/2,350))
+        pygame.draw.rect(WINDOW,(255,0,0),input_rect,2)
+        title_label=title_font.render('Enter your name -',1,(255,255,255))
+        WINDOW.blit(title_label,(WIDTH/2-title_label.get_width()/2,300))
+        user_text_label=user_text_font.render(main_menu.user_text,1,(255,255,255))  
+        WINDOW.blit(user_text_label,(input_rect.x+10,input_rect.y))
+        
+        input_rect.w=max(140,user_text_label.get_width()+20)
+        
         pygame.display.update()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run=False
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                main()
-            
+            if event.type==pygame.MOUSEBUTTONDOWN:
+                if input_rect.collidepoint(event.pos):
+                    active=True
+                else:
+                    active=False
+            if event.type == pygame.KEYDOWN:
+                if active==True:
+                    if event.key==pygame.K_BACKSPACE:
+                        main_menu.user_text=main_menu.user_text[:-1]
+                    elif event.key==pygame.K_RETURN:
+                        if main_menu.user_text !='':
+                            main()
+                            main_menu.user_text=''
+                    else:
+                        main_menu.user_text+=event.unicode
+                        
     pygame.quit()
-            
                
 main_menu()
             
