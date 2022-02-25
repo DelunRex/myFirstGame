@@ -12,7 +12,7 @@ pygame.display.set_caption("Shooter")
 
 RED_SPACE_SHIP= pygame.image.load(os.path.join("assets","pixel_ship_red_small.png"))
 GREEN_SPACE_SHIP= pygame.image.load(os.path.join("assets","pixel_ship_green_small.png"))
-YELLOW_SPACE_SHIP= pygame.image.load(os.path.join("assets","pixel_ship_yellow.png"))
+SPACE_SHIP= pygame.image.load(os.path.join("assets","pixel_ship.png"))
 
 RED_LASER=pygame.image.load(os.path.join("assets","pixel_laser_red.png"))
 GREEN_LASER=pygame.image.load(os.path.join("assets","pixel_laser_green.png"))
@@ -89,7 +89,7 @@ class Ship():
 class Player(Ship):
     def __init__(self,x,y,health=100):
         super().__init__(x,y,health)
-        self.ship_img=YELLOW_SPACE_SHIP
+        self.ship_img=SPACE_SHIP
         self.laser_img=YELLOW_LASER
         self.mask=pygame.mask.from_surface(self.ship_img)
         self.max_health=health
@@ -112,17 +112,18 @@ class Player(Ship):
     def check_high_score(self):
         if main.score > int(main.high_score):
             main.high_score = main.score
-            main.temp=main_menu.user_text+" "+str(main.score)+" "
-            high_score_file = open("high_score.txt", "r+")
+            main.temp=main_menu.user_text+" "+str(main.score)
+            high_score_file = open("high_score.txt", "w+")
             high_score_file.write(main.temp)
+            high_score_file.close()
     
     def draw(self,window):
         super().draw(window)
         self.healthbar(window)
     
     def healthbar(self,window):
-        pygame.draw.rect(window,(255,0,0),(self.x,self.y+self.ship_img.get_height()+10,self.ship_img.get_width(),10))
-        pygame.draw.rect(window,(0,255,0),(self.x,self.y+self.ship_img.get_height()+10,self.ship_img.get_width()*(self.health/self.max_health),10))
+        pygame.draw.rect(window,(255,0,0),(self.x,self.y+self.ship_img.get_height(),self.ship_img.get_width(),10))
+        pygame.draw.rect(window,(0,255,0),(self.x,self.y+self.ship_img.get_height(),self.ship_img.get_width()*(self.health/self.max_health),10))
 
 class Enemy(Ship):
     COLOR_MAP={
@@ -175,13 +176,6 @@ def main():
     lost=False
     lost_count=0
         
-    def check_high_score():
-        if main.score > int(main.high_score):
-            main.high_score = main.score
-            main.temp=main_menu.user_text+" "+str(main.score)+" "
-            high_score_file = open("high_score.txt", "r+")
-            high_score_file.write(main.temp)
-    
     def redraw_window():
         WINDOW.blit(BG,(0,0))
         
@@ -190,7 +184,7 @@ def main():
         score_label=main_font.render(f"Score: {main.score}",1,(255,255,255)) 
         high_score_label = main_font.render(f"High Score: {main.temp}",1,(255,255,255))    
         WINDOW.blit(level_label,(5,5))
-        WINDOW.blit(lives_label,(WIDTH-lives_label.get_width()-15,5))
+        WINDOW.blit(lives_label,(WIDTH-lives_label.get_width()-10,5))
         WINDOW.blit(score_label,(5,40))
         WINDOW.blit(high_score_label,(WIDTH-high_score_label.get_width()-5,40))
         
@@ -253,8 +247,6 @@ def main():
             
             if collide(enemy,player):
                 player.health -= 15
-                main.score+=20
-                check_high_score()
                 enemies.remove(enemy) 
             elif enemy.y + enemy.get_height() > HEIGHT:
                 lives-=1
